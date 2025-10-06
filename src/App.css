@@ -684,6 +684,118 @@
   cursor: not-allowed;
 }
 
+.metronome-control {
+  display: flex;
+  align-items: center;
+  font-family: 'Share Tech Mono', monospace;
+  color: #3df593;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.metronome-control label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+}
+
+.metronome-control input[type="checkbox"] {
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  background: #0a0a0a;
+  border: 2px solid #2a2a2a;
+  border-radius: 3px;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.2s ease;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.8);
+}
+
+.metronome-control input[type="checkbox"]:hover:not(:disabled) {
+  border-color: #3df593;
+}
+
+.metronome-control input[type="checkbox"]:checked {
+  background: linear-gradient(145deg, #3df593 0%, #2d8a5c 100%);
+  border-color: #3df593;
+  box-shadow: 
+    inset 0 1px 0 rgba(255, 255, 255, 0.3),
+    0 0 8px rgba(61, 245, 147, 0.6);
+}
+
+.metronome-control input[type="checkbox"]:checked::after {
+  content: '✓';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: #0a0a0a;
+  font-size: 0.9rem;
+  font-weight: 900;
+}
+
+.metronome-control input[type="checkbox"]:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.countin-control {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: 'Share Tech Mono', monospace;
+  color: #3df593;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.countin-selector {
+  display: flex;
+  gap: 0.25rem;
+  background: #0a0a0a;
+  padding: 0.2rem;
+  border-radius: 3px;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.8);
+}
+
+.countin-btn {
+  padding: 0.4rem 0.6rem;
+  font-size: 0.7rem;
+  background: linear-gradient(145deg, #2a2a2a 0%, #1a1a1a 100%);
+  color: #7a7a7a;
+  border: 1px solid #0a0a0a;
+  border-radius: 2px;
+  cursor: pointer;
+  transition: all 0.1s ease;
+  font-weight: 700;
+  font-family: 'Share Tech Mono', monospace;
+  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.5);
+  min-width: 2.5rem;
+}
+
+.countin-btn:hover:not(:disabled) {
+  background: linear-gradient(145deg, #3a3a3a 0%, #2a2a2a 100%);
+  color: #3df593;
+}
+
+.countin-btn.active {
+  background: linear-gradient(145deg, #3df593 0%, #2d8a5c 100%);
+  color: #0a0a0a;
+  box-shadow: 
+    0 2px 0 rgba(0, 0, 0, 0.5),
+    0 0 8px rgba(61, 245, 147, 0.6),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+.countin-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 .recorder-transport {
   display: flex;
   gap: 0.75rem;
@@ -848,6 +960,29 @@
   position: relative;
 }
 
+.playback-progress.recording {
+  background: linear-gradient(90deg, #ff3030 0%, #cc0000 100%);
+  box-shadow: 
+    0 0 15px rgba(255, 48, 48, 0.8),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  animation: pulse-progress 1s ease-in-out infinite;
+}
+
+@keyframes pulse-progress {
+  0%, 100% { 
+    opacity: 1;
+    box-shadow: 
+      0 0 15px rgba(255, 48, 48, 0.8),
+      inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  }
+  50% { 
+    opacity: 0.8;
+    box-shadow: 
+      0 0 25px rgba(255, 48, 48, 1),
+      inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  }
+}
+
 .playback-progress::after {
   content: '';
   position: absolute;
@@ -866,6 +1001,32 @@
   height: 100%;
   background: rgba(61, 245, 147, 0.3);
   pointer-events: none;
+  z-index: 1;
+}
+
+.hit-marker {
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #3df593;
+  box-shadow: 
+    0 0 4px rgba(61, 245, 147, 0.8),
+    inset 0 1px 1px rgba(255, 255, 255, 0.5);
+  pointer-events: all;
+  cursor: help;
+  z-index: 2;
+  transition: all 0.2s ease;
+}
+
+.hit-marker:hover {
+  width: 8px;
+  height: 8px;
+  box-shadow: 
+    0 0 8px rgba(61, 245, 147, 1),
+    inset 0 1px 1px rgba(255, 255, 255, 0.5);
 }
 
 .recording-status {
@@ -895,6 +1056,43 @@
 }
 
 @keyframes pulse-dot {
+  0%, 100% { 
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% { 
+    opacity: 0.5;
+    transform: scale(1.2);
+  }
+}
+
+.countin-status {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 1rem;
+  padding: 0.75rem;
+  background: rgba(255, 165, 0, 0.1);
+  border: 1px solid rgba(255, 165, 0, 0.3);
+  border-radius: 4px;
+  font-family: 'Share Tech Mono', monospace;
+  color: #ffa500;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+}
+
+.countin-pulse {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #ffa500;
+  animation: pulse-countin 1s ease-in-out infinite;
+  box-shadow: 0 0 10px rgba(255, 165, 0, 0.8);
+}
+
+@keyframes pulse-countin {
   0%, 100% { 
     opacity: 1;
     transform: scale(1);
