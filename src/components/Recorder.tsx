@@ -13,7 +13,6 @@ export const Recorder: React.FC<RecorderProps> = ({
   onPlay,
   isRecording,
   onRecordingChange,
-  onRecordHit,
   recordedHits,
 }) => {
   const [bpm, setBpm] = useState<number>(120);
@@ -81,7 +80,7 @@ export const Recorder: React.FC<RecorderProps> = ({
     scheduledHitsRef.current.clear();
     
     // Schedule all hits
-    recording.hits.forEach((hit, index) => {
+    recording.hits.forEach((hit) => {
       const timeoutId = window.setTimeout(() => {
         onPlay(hit.padId);
         scheduledHitsRef.current.delete(timeoutId);
