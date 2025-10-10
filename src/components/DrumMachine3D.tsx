@@ -12,7 +12,7 @@ import HHO from '../assets/sounds/HHo_Vinyl_DLG1_SP12.wav';
 import Ride from '../assets/sounds/Ride_RealTing1_45_SP1200.wav';
 import Rim from '../assets/sounds/Rim_MysteryVin_SP1200.wav';
 import SD1 from '../assets/sounds/SD_45VinylE1_SP1200R.wav';
-import SD2 from '../assets/sounds/SD_UheACE1_SP1200R.wav';
+import SD2 from '../assets/sounds/DillaStopSnare.wav';
 import Tabla from '../assets/sounds/Tabla017_SP1200F.wav';
 import Tom1 from '../assets/sounds/Tom_LiveLounge1_SP1200F.wav';
 import Tom3 from '../assets/sounds/Tom_LiveLounge3_SP1200F.wav';
@@ -143,12 +143,32 @@ function DrumPad({
 }
 
 // Main drum machine body - cream base with integrated screen module
-function DrumMachineBody() {
+function DrumMachineBody({
+  playbackPosition,
+  recordingPosition,
+  isPlaying,
+  isRecording,
+  bpm
+}: {
+  playbackPosition: number;
+  recordingPosition: number;
+  isPlaying: boolean;
+  isRecording: boolean;
+  bpm: number;
+}) {
   const baseMeshRef = useRef<THREE.Mesh>(null);
   const screenModuleRef = useRef<THREE.Mesh>(null);
   const screenDisplayRef = useRef<THREE.Mesh>(null);
+  const [, setForceUpdate] = useState(0);
   
-  // Create text texture for screen
+  // Update screen every frame when playing/recording
+  useFrame(() => {
+    if (isPlaying || isRecording) {
+      setForceUpdate(prev => prev + 1);
+    }
+  });
+  
+  // Create text texture for screen with playbar
   const screenTexture = useMemo(() => {
     const canvas = document.createElement('canvas');
     canvas.width = 512;
@@ -159,23 +179,57 @@ function DrumMachineBody() {
       ctx.fillStyle = '#000000';
       ctx.fillRect(0, 0, 512, 256);
       
-      // Green text
-      ctx.font = 'bold 48px monospace';
+      // Green text - title
+      ctx.font = 'bold 32px monospace';
       ctx.fillStyle = '#00ff00';
       ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText('DrumMachine3D', 256, 128);
+      ctx.textBaseline = 'top';
+      ctx.fillText('DrumMachine3D', 256, 20);
+      
+      // BPM display
+      ctx.font = 'bold 24px monospace';
+      ctx.fillText(`BPM: ${bpm}`, 256, 70);
+      
+      // Playbar
+      const barWidth = 480;
+      const barHeight = 30;
+      const barX = 16;
+      const barY = 120;
+      
+      // Playbar background
+      ctx.strokeStyle = '#00ff00';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(barX, barY, barWidth, barHeight);
+      
+      // Playbar progress
+      const currentPosition = isRecording ? recordingPosition : playbackPosition;
+      if (isPlaying || isRecording) {
+        ctx.fillStyle = isRecording ? '#ff0000' : '#00ff00';
+        ctx.fillRect(barX + 2, barY + 2, (barWidth - 4) * currentPosition, barHeight - 4);
+      }
+      
+      // Status text
+      ctx.font = 'bold 20px monospace';
+      ctx.fillStyle = isRecording ? '#ff0000' : '#00ff00';
+      ctx.textAlign = 'center';
+      if (isRecording) {
+        ctx.fillText('● RECORDING', 256, 170);
+      } else if (isPlaying) {
+        ctx.fillText('▶ PLAYING', 256, 170);
+      } else {
+        ctx.fillText('READY', 256, 170);
+      }
       
       // Add scanline effect
       for (let i = 0; i < 256; i += 4) {
-        ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
         ctx.fillRect(0, i, 512, 2);
       }
     }
     const texture = new THREE.CanvasTexture(canvas);
     texture.needsUpdate = true;
     return texture;
-  }, []);
+  }, [playbackPosition, recordingPosition, isPlaying, isRecording, bpm]);
   
   useEffect(() => {
     const material = createPSXMaterial('#e8e4d9');
@@ -208,10 +262,22 @@ function DrumMachineBody() {
 // Scene component
 function Scene({ 
   playSound, 
-  playingPads 
+  playingPads,
+  playbackPosition,
+  recordingPosition,
+  isPlaying,
+  isRecording,
+  bpm
 }: { 
   playSound: (index: number) => void;
   playingPads: Set<number>;
+  playbackPosition: number;
+  recordingPosition: number;
+  isPlaying: boolean;
+  isRecording: boolean;
+  recordedHits: RecordedHit[];
+  bpm: number;
+  bars: number;
 }) {
   const { camera } = useThree();
   
@@ -258,7 +324,13 @@ function Scene({
       <directionalLight position={[-5, 3, -5]} intensity={1.0} />
       <pointLight position={[0, 5, 0]} intensity={1.5} />
       
-      <DrumMachineBody />
+      <DrumMachineBody 
+        playbackPosition={playbackPosition}
+        recordingPosition={recordingPosition}
+        isPlaying={isPlaying}
+        isRecording={isRecording}
+        bpm={bpm}
+      />
       {pads}
       
       <OrbitControls
@@ -279,18 +351,23 @@ export function DrumMachine3D() {
   const [audioBuffers, setAudioBuffers] = useState<Map<number, AudioBuffer>>(new Map());
   const [playingPads, setPlayingPads] = useState<Set<number>>(new Set());
   const [isRecording, setIsRecording] = useState<boolean>(false);
-  const [recordedHits, setRecordedHits] = useState<RecordedHit[]>([]);
-  const [recording, setRecording] = useState<{ hits: RecordedHit[], bars: 8 | 16, bpm: number, duration: number } | null>(null);
+  const [recording, setRecording] = useState<{ hits: RecordedHit[], bars: number, bpm: number, duration: number } | null>(null);
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [bpm, setBpm] = useState<number>(120);
-  const [bars, setBars] = useState<8 | 16>(8);
-  const [currentBar, setCurrentBar] = useState<number>(1);
-  const [currentBeat, setCurrentBeat] = useState<number>(1);
+  const [metronomeEnabled, setMetronomeEnabled] = useState<boolean>(true);
+  const [playbackPosition, setPlaybackPosition] = useState<number>(0);
+  const [recordingPosition, setRecordingPosition] = useState<number>(0);
+  const [menuCollapsed, setMenuCollapsed] = useState<boolean>(false);
+  const bars = 8; // Fixed to 8 bars
+  const countInBars = 1; // Fixed to 4 beat count-in (1 bar)
+  const recordedHitsRef = useRef<RecordedHit[]>([]);
   const recordingStartTimeRef = useRef<number>(0);
   const playbackStartTimeRef = useRef<number>(0);
   const scheduledHitsRef = useRef<Set<number>>(new Set());
   const playbackIntervalRef = useRef<number | null>(null);
   const recordingIntervalRef = useRef<number | null>(null);
+  const metronomeIntervalRef = useRef<number | null>(null);
+  const audioContextRef = useRef<AudioContext | null>(null);
 
   // Load sounds
   useEffect(() => {
@@ -338,7 +415,7 @@ export function DrumMachine3D() {
     // Record hit if recording
     if (isRecording) {
       const timestamp = Date.now() - recordingStartTimeRef.current;
-      setRecordedHits(prev => [...prev, { padId: index, timestamp }]);
+      recordedHitsRef.current.push({ padId: index, timestamp });
     }
     
     setTimeout(() => {
@@ -375,55 +452,118 @@ export function DrumMachine3D() {
     return (beats / selectedBpm) * 60 * 1000;
   };
 
+  // Metronome functions
+  const playMetronomeClick = useCallback((isDownbeat: boolean = false) => {
+    if (!audioContextRef.current || !metronomeEnabled) return;
+    
+    const ctx = audioContextRef.current;
+    const oscillator = ctx.createOscillator();
+    const gainNode = ctx.createGain();
+    
+    oscillator.connect(gainNode);
+    gainNode.connect(ctx.destination);
+    
+    oscillator.frequency.value = isDownbeat ? 1200 : 800;
+    oscillator.type = 'sine';
+    
+    gainNode.gain.setValueAtTime(0.3, ctx.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.05);
+    
+    oscillator.start(ctx.currentTime);
+    oscillator.stop(ctx.currentTime + 0.05);
+  }, [metronomeEnabled]);
+
+  const startMetronome = useCallback(() => {
+    if (!metronomeEnabled) return;
+    
+    const beatDuration = (60 / bpm) * 1000;
+    let beatCount = 0;
+    
+    playMetronomeClick(true);
+    
+    metronomeIntervalRef.current = window.setInterval(() => {
+      beatCount++;
+      const isDownbeat = beatCount % 4 === 0;
+      playMetronomeClick(isDownbeat);
+    }, beatDuration);
+  }, [bpm, metronomeEnabled, playMetronomeClick]);
+
+  const stopMetronome = useCallback(() => {
+    if (metronomeIntervalRef.current) {
+      clearInterval(metronomeIntervalRef.current);
+      metronomeIntervalRef.current = null;
+    }
+  }, []);
+
   // Recording handlers
   const handleRecord = () => {
     if (isRecording) {
-      // Stop recording
+      // Stop recording manually
       setIsRecording(false);
+      setRecordingPosition(0);
+      stopMetronome();
       
       if (recordingIntervalRef.current) {
         clearInterval(recordingIntervalRef.current);
         recordingIntervalRef.current = null;
       }
       
+      // Save the recording with current hits
       const duration = calculateDuration(bars, bpm);
       setRecording({
-        hits: recordedHits,
+        hits: [...recordedHitsRef.current],
         bars,
         bpm,
         duration,
       });
-      setCurrentBar(1);
-      setCurrentBeat(1);
     } else {
-      // Start recording
+      // Start count-in then recording
       setRecording(null);
       setIsPlaying(false);
-      setRecordedHits([]);
-      setIsRecording(true);
-      recordingStartTimeRef.current = Date.now();
+      recordedHitsRef.current = [];
+      setRecordingPosition(0);
       
-      // Update position display
-      const duration = calculateDuration(bars, bpm);
-      recordingIntervalRef.current = window.setInterval(() => {
-        const elapsed = Date.now() - recordingStartTimeRef.current;
-        const position = Math.min(elapsed / duration, 1);
-        const totalBeats = bars * 4;
-        const currentBeatNum = Math.floor(position * totalBeats);
-        setCurrentBar(Math.floor(currentBeatNum / 4) + 1);
-        setCurrentBeat((currentBeatNum % 4) + 1);
-      }, 50);
+      if (metronomeEnabled) {
+        startMetronome();
+      }
       
-      // Auto-stop after duration
+      // Count-in for 4 beats (1 bar)
+      const countInDuration = calculateDuration(countInBars, bpm);
+      
       setTimeout(() => {
-        setIsRecording(false);
-        if (recordingIntervalRef.current) {
-          clearInterval(recordingIntervalRef.current);
-          recordingIntervalRef.current = null;
-        }
-        setCurrentBar(1);
-        setCurrentBeat(1);
-      }, duration);
+        // Start actual recording after count-in
+        setIsRecording(true);
+        recordingStartTimeRef.current = Date.now();
+        
+        const duration = calculateDuration(bars, bpm);
+        
+        // Update recording position
+        recordingIntervalRef.current = window.setInterval(() => {
+          const elapsed = Date.now() - recordingStartTimeRef.current;
+          const position = Math.min(elapsed / duration, 1);
+          setRecordingPosition(position);
+        }, 50);
+        
+        // Auto-stop after duration
+        setTimeout(() => {
+          setIsRecording(false);
+          setRecordingPosition(0);
+          stopMetronome();
+          if (recordingIntervalRef.current) {
+            clearInterval(recordingIntervalRef.current);
+            recordingIntervalRef.current = null;
+          }
+          
+          // Save the recording with the current recorded hits
+          const newRecording = {
+            hits: [...recordedHitsRef.current],
+            bars,
+            bpm,
+            duration,
+          };
+          setRecording(newRecording);
+        }, duration);
+      }, countInDuration);
     }
   };
 
@@ -442,6 +582,10 @@ export function DrumMachine3D() {
     playbackStartTimeRef.current = Date.now();
     scheduledHitsRef.current.clear();
     
+    if (metronomeEnabled) {
+      startMetronome();
+    }
+    
     // Schedule all hits
     recording.hits.forEach((hit) => {
       const timeoutId = window.setTimeout(() => {
@@ -455,10 +599,7 @@ export function DrumMachine3D() {
     playbackIntervalRef.current = window.setInterval(() => {
       const elapsed = Date.now() - playbackStartTimeRef.current;
       const position = Math.min(elapsed / recording.duration, 1);
-      const totalBeats = recording.bars * 4;
-      const currentBeatNum = Math.floor(position * totalBeats);
-      setCurrentBar(Math.floor(currentBeatNum / 4) + 1);
-      setCurrentBeat((currentBeatNum % 4) + 1);
+      setPlaybackPosition(position);
       
       if (position >= 1) {
         // Loop playback
@@ -470,8 +611,8 @@ export function DrumMachine3D() {
 
   const stopPlayback = () => {
     setIsPlaying(false);
-    setCurrentBar(1);
-    setCurrentBeat(1);
+    setPlaybackPosition(0);
+    stopMetronome();
     
     if (playbackIntervalRef.current) {
       clearInterval(playbackIntervalRef.current);
@@ -487,16 +628,25 @@ export function DrumMachine3D() {
 
   const handleClear = () => {
     stopPlayback();
+    stopMetronome();
     setRecording(null);
-    setRecordedHits([]);
+    recordedHitsRef.current = [];
     setIsRecording(false);
-    setCurrentBar(1);
-    setCurrentBeat(1);
+    setPlaybackPosition(0);
+    setRecordingPosition(0);
     if (recordingIntervalRef.current) {
       clearInterval(recordingIntervalRef.current);
       recordingIntervalRef.current = null;
     }
   };
+
+  // Initialize audio context for metronome
+  useEffect(() => {
+    if (!audioContextRef.current) {
+      const AudioContextClass = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+      audioContextRef.current = new AudioContextClass();
+    }
+  }, []);
 
   // Cleanup on unmount
   useEffect(() => {
@@ -504,6 +654,7 @@ export function DrumMachine3D() {
     return () => {
       if (playbackIntervalRef.current) clearInterval(playbackIntervalRef.current);
       if (recordingIntervalRef.current) clearInterval(recordingIntervalRef.current);
+      if (metronomeIntervalRef.current) clearInterval(metronomeIntervalRef.current);
       scheduledHits.forEach(timeoutId => clearTimeout(timeoutId));
       scheduledHits.clear();
     };
@@ -525,163 +676,163 @@ export function DrumMachine3D() {
         dpr={[1.5, 2]}
       >
         <color attach="background" args={['#3a3a5e']} />
-        <Scene playSound={playSound} playingPads={playingPads} />
+        <Scene 
+          playSound={playSound} 
+          playingPads={playingPads}
+          playbackPosition={playbackPosition}
+          recordingPosition={recordingPosition}
+          isPlaying={isPlaying}
+          isRecording={isRecording}
+          recordedHits={[]}
+          bpm={bpm}
+          bars={8}
+        />
       </Canvas>
       
-      {/* PSX-style Recorder overlay */}
+      {/* Simplified collapsible recorder UI */}
       <div style={{
         position: 'absolute',
-        top: 20,
-        right: 20,
+        bottom: window.innerWidth < 768 ? '50%' : 20,
+        left: '50%',
+        transform: window.innerWidth < 768 ? 'translate(-50%, 50%)' : 'translateX(-50%)',
         color: '#00ff00',
         fontFamily: 'monospace',
         fontSize: '12px',
         textShadow: '2px 2px 0px #003300',
         pointerEvents: 'auto',
-        background: 'rgba(0, 0, 0, 0.7)',
-        padding: '15px',
+        background: 'rgba(0, 0, 0, 0.8)',
+        padding: '12px',
         border: '2px solid #00ff00',
         boxShadow: '0 0 10px rgba(0, 255, 0, 0.3)',
+        borderRadius: '4px',
+        zIndex: 1000,
       }}>
-        <div style={{ marginBottom: '10px', fontSize: '14px', fontWeight: 'bold' }}>
-          ▶ LOOP RECORDER
-        </div>
-        
-        <div style={{ display: 'flex', gap: '15px', marginBottom: '10px' }}>
-          <div>
-            <div style={{ marginBottom: '5px' }}>BPM</div>
-            <input
-              type="number"
-              min="60"
-              max="200"
-              value={bpm}
-              onChange={(e) => setBpm(Math.max(60, Math.min(200, parseInt(e.target.value) || 120)))}
-              disabled={isRecording || isPlaying}
-              style={{
-                background: '#000',
-                color: '#00ff00',
-                border: '1px solid #00ff00',
-                padding: '4px 8px',
-                fontFamily: 'monospace',
-                fontSize: '12px',
-                width: '60px',
-              }}
-            />
-          </div>
-          
-          <div>
-            <div style={{ marginBottom: '5px' }}>BARS</div>
-            <div style={{ display: 'flex', gap: '5px' }}>
-              <button
-                onClick={() => setBars(8)}
-                disabled={isRecording || isPlaying}
-                style={{
-                  background: bars === 8 ? '#00ff00' : '#000',
-                  color: bars === 8 ? '#000' : '#00ff00',
-                  border: '1px solid #00ff00',
-                  padding: '4px 12px',
-                  cursor: 'pointer',
-                  fontFamily: 'monospace',
-                  fontSize: '12px',
-                }}
-              >
-                8
-              </button>
-              <button
-                onClick={() => setBars(16)}
-                disabled={isRecording || isPlaying}
-                style={{
-                  background: bars === 16 ? '#00ff00' : '#000',
-                  color: bars === 16 ? '#000' : '#00ff00',
-                  border: '1px solid #00ff00',
-                  padding: '4px 12px',
-                  cursor: 'pointer',
-                  fontFamily: 'monospace',
-                  fontSize: '12px',
-                }}
-              >
-                16
-              </button>
-            </div>
-          </div>
-        </div>
-        
-        <div style={{ display: 'flex', gap: '8px', marginBottom: '10px' }}>
-          <button
-            onClick={handleRecord}
-            disabled={isPlaying}
-            style={{
-              background: isRecording ? '#ff0000' : '#000',
-              color: isRecording ? '#fff' : '#00ff00',
-              border: `2px solid ${isRecording ? '#ff0000' : '#00ff00'}`,
-              padding: '6px 12px',
-              cursor: 'pointer',
-              fontFamily: 'monospace',
-              fontSize: '12px',
-              fontWeight: 'bold',
-              boxShadow: isRecording ? '0 0 10px rgba(255, 0, 0, 0.5)' : 'none',
-            }}
-          >
-            {isRecording ? '⬛ STOP' : '● REC'}
-          </button>
-          
-          <button
-            onClick={handlePlayStop}
-            disabled={isRecording || !recording || recording.hits.length === 0}
-            style={{
-              background: isPlaying ? '#00ff00' : '#000',
-              color: isPlaying ? '#000' : '#00ff00',
-              border: '2px solid #00ff00',
-              padding: '6px 12px',
-              cursor: 'pointer',
-              fontFamily: 'monospace',
-              fontSize: '12px',
-              fontWeight: 'bold',
-              opacity: (!recording || recording.hits.length === 0) && !isPlaying ? 0.5 : 1,
-            }}
-          >
-            {isPlaying ? '⬛ STOP' : '▶ PLAY'}
-          </button>
-          
-          <button
-            onClick={handleClear}
-            disabled={isRecording || isPlaying}
-            style={{
-              background: '#000',
-              color: '#00ff00',
-              border: '1px solid #00ff00',
-              padding: '6px 12px',
-              cursor: 'pointer',
-              fontFamily: 'monospace',
-              fontSize: '12px',
-            }}
-          >
-            ✕ CLR
-          </button>
-        </div>
-        
         <div style={{ 
           display: 'flex', 
-          gap: '10px', 
-          fontSize: '11px',
-          borderTop: '1px solid #00ff00',
-          paddingTop: '8px',
+          alignItems: 'center', 
+          gap: '10px',
+          flexWrap: 'wrap',
+          justifyContent: 'center'
         }}>
-          <div>BAR: {currentBar}/{bars}</div>
-          <div>BEAT: {currentBeat}/4</div>
-          <div>HITS: {isRecording ? recordedHits.length : (recording?.hits.length || 0)}</div>
+          {/* Toggle button for mobile */}
+          <button
+            onClick={() => setMenuCollapsed(!menuCollapsed)}
+            style={{
+              background: 'transparent',
+              border: '1px solid #00ff00',
+              color: '#00ff00',
+              padding: '4px 8px',
+              cursor: 'pointer',
+              fontFamily: 'monospace',
+              fontSize: '10px',
+            }}
+          >
+            {menuCollapsed ? '▼' : '▲'}
+          </button>
+          
+          {!menuCollapsed && (
+            <>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                <label style={{ fontSize: '10px' }}>BPM:</label>
+                <input
+                  type="number"
+                  min="60"
+                  max="200"
+                  value={bpm}
+                  onChange={(e) => setBpm(Math.max(60, Math.min(200, parseInt(e.target.value) || 120)))}
+                  onBlur={(e) => e.currentTarget.blur()}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.currentTarget.blur();
+                    }
+                  }}
+                  disabled={isRecording || isPlaying}
+                  style={{
+                    background: '#000',
+                    color: '#00ff00',
+                    border: '1px solid #00ff00',
+                    padding: '4px',
+                    fontFamily: 'monospace',
+                    fontSize: '11px',
+                    width: '50px',
+                  }}
+                />
+              </div>
+              
+              <label style={{ display: 'flex', alignItems: 'center', gap: '5px', cursor: 'pointer' }}>
+                <input
+                  type="checkbox"
+                  checked={metronomeEnabled}
+                  onChange={(e) => setMetronomeEnabled(e.target.checked)}
+                  style={{ cursor: 'pointer' }}
+                />
+                <span style={{ fontSize: '10px' }}>METRO</span>
+              </label>
+              
+              <div style={{ display: 'flex', gap: '5px' }}>
+                <button
+                  onClick={(e) => {
+                    handleRecord();
+                    e.currentTarget.blur();
+                  }}
+                  disabled={isPlaying}
+                  style={{
+                    background: isRecording ? '#ff0000' : '#000',
+                    color: isRecording ? '#fff' : '#00ff00',
+                    border: `2px solid ${isRecording ? '#ff0000' : '#00ff00'}`,
+                    padding: '6px 10px',
+                    cursor: 'pointer',
+                    fontFamily: 'monospace',
+                    fontSize: '11px',
+                    fontWeight: 'bold',
+                  }}
+                >
+                  {isRecording ? 'STOP' : 'REC'}
+                </button>
+                
+                <button
+                  onClick={(e) => {
+                    handlePlayStop();
+                    e.currentTarget.blur();
+                  }}
+                  disabled={isRecording || !recording || recording.hits.length === 0}
+                  style={{
+                    background: isPlaying ? '#00ff00' : '#000',
+                    color: isPlaying ? '#000' : '#00ff00',
+                    border: '2px solid #00ff00',
+                    padding: '6px 10px',
+                    cursor: 'pointer',
+                    fontFamily: 'monospace',
+                    fontSize: '11px',
+                    fontWeight: 'bold',
+                    opacity: (!recording || recording.hits.length === 0) && !isPlaying ? 0.5 : 1,
+                  }}
+                >
+                  {isPlaying ? 'STOP' : 'PLAY'}
+                </button>
+                
+                <button
+                  onClick={(e) => {
+                    handleClear();
+                    e.currentTarget.blur();
+                  }}
+                  disabled={isRecording || isPlaying}
+                  style={{
+                    background: '#000',
+                    color: '#00ff00',
+                    border: '1px solid #00ff00',
+                    padding: '6px 10px',
+                    cursor: 'pointer',
+                    fontFamily: 'monospace',
+                    fontSize: '11px',
+                  }}
+                >
+                  CLR
+                </button>
+              </div>
+            </>
+          )}
         </div>
-        
-        {isRecording && (
-          <div style={{ 
-            marginTop: '8px', 
-            color: '#ff0000',
-            animation: 'pulse 1s infinite',
-            textAlign: 'center',
-          }}>
-            ● RECORDING
-          </div>
-        )}
       </div>
       
       {/* PSX-style overlay info */}
