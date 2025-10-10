@@ -16,6 +16,12 @@ import SD2 from '../assets/sounds/SD_UheACE1_SP1200R.wav';
 import Tabla from '../assets/sounds/Tabla017_SP1200F.wav';
 import Tom1 from '../assets/sounds/Tom_LiveLounge1_SP1200F.wav';
 import Tom3 from '../assets/sounds/Tom_LiveLounge3_SP1200F.wav';
+import Bass1 from '../assets/sounds/JAY_DEE_vol_01_kit_03_bass_B_2.wav';
+import Bass2 from '../assets/sounds/JAY_DEE_vol_01_kit_08_bass_Fsharp.wav';
+import Bass3 from '../assets/sounds/JAY_DEE_vol_01_kit_09_bass_Csharp.wav';
+import Bass4 from '../assets/sounds/JAY_DEE_vol_02_kit_01_bass_01_G.wav';
+import Bass5 from '../assets/sounds/JAY_DEE_vol_02_kit_01_bass_02_Dsharp.wav';
+import Bass6 from '../assets/sounds/JAY_DEE_vol_02_kit_05_bass_C.wav';
 
 const DEFAULT_SOUNDS = [
   { url: SD1, name: 'Snare', key: 'Q' },
@@ -28,12 +34,12 @@ const DEFAULT_SOUNDS = [
   { url: Ride, name: 'Ride', key: 'F' },
   { url: Rim, name: 'Rim', key: 'Z' },
   { url: Tabla, name: 'Tabla', key: 'X' },
-  { url: null, name: '', key: 'C' },
-  { url: null, name: '', key: 'V' },
-  { url: null, name: '', key: 'T' },
-  { url: null, name: '', key: 'G' },
-  { url: null, name: '', key: 'Y' },
-  { url: null, name: '', key: 'H' },
+  { url: Bass1, name: '808 B', key: 'C' },
+  { url: Bass2, name: '808 F♯', key: 'V' },
+  { url: Bass3, name: '808 C♯', key: 'T' },
+  { url: Bass4, name: '808 G', key: 'G' },
+  { url: Bass5, name: '808 D♯', key: 'Y' },
+  { url: Bass6, name: '808 C', key: 'H' },
 ];
 
 // Simple Phong Material (no custom shader)
@@ -112,7 +118,10 @@ function DrumPad({
       {/* Pad button */}
       <mesh
         ref={meshRef}
-        onClick={() => onHit(index)}
+        onPointerDown={(e) => {
+          e.stopPropagation();
+          onHit(index);
+        }}
         onPointerOver={(e) => {
           e.stopPropagation();
           document.body.style.cursor = 'pointer';
@@ -125,7 +134,7 @@ function DrumPad({
       </mesh>
       
       {/* Key label on top */}
-      <mesh position={[0, 0.08, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+      <mesh position={[0, 0.08, 0]} rotation={[-Math.PI / 2, 0, 0]} raycast={() => null}>
         <planeGeometry args={[0.4, 0.4]} />
         <meshBasicMaterial map={textTexture} transparent />
       </mesh>
@@ -501,7 +510,13 @@ export function DrumMachine3D() {
   }, []);
 
   return (
-    <div style={{ width: '100vw', height: '100vh', background: '#000', position: 'relative' }}>
+    <div style={{ 
+      width: '100vw', 
+      height: '100vh', 
+      background: '#000', 
+      position: 'relative',
+      touchAction: 'none' 
+    }}>
       <Canvas
         gl={{
           antialias: false,
