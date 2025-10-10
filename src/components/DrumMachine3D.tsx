@@ -692,9 +692,9 @@ export function DrumMachine3D() {
       {/* Simplified collapsible recorder UI */}
       <div style={{
         position: 'absolute',
-        bottom: window.innerWidth < 768 ? '50%' : 20,
+        bottom: 20,
         left: '50%',
-        transform: window.innerWidth < 768 ? 'translate(-50%, 50%)' : 'translateX(-50%)',
+        transform: 'translateX(-50%)',
         color: '#00ff00',
         fontFamily: 'monospace',
         fontSize: '12px',
