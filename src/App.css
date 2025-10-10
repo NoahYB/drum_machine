@@ -6,7 +6,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 2rem;
+  padding: clamp(0.5rem, 3vw, 2rem);
   background: 
     repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.15) 0px, transparent 1px, transparent 2px, rgba(0, 0, 0, 0.15) 3px),
     repeating-linear-gradient(90deg, rgba(0, 0, 0, 0.15) 0px, transparent 1px, transparent 2px, rgba(0, 0, 0, 0.15) 3px),
@@ -15,16 +15,17 @@
 }
 
 .sampler-container {
+  margin: auto 1in;
   width: 100%;
-  max-width: 800px;
-  padding: 3rem 2.5rem 2.5rem;
+  max-width: 1000px;
+  padding: clamp(1rem, 2vw, 2rem) clamp(1rem, 2vw, 2rem) clamp(1rem, 2vw, 1.5rem);
   background: linear-gradient(145deg, #2d2d2d 0%, #1a1a1a 100%);
-  border-radius: 8px;
+  border-radius: clamp(4px, 1vw, 8px);
   box-shadow: 
     0 30px 60px rgba(0, 0, 0, 0.8),
     inset 0 1px 0 rgba(255, 255, 255, 0.1),
     inset 0 -1px 0 rgba(0, 0, 0, 0.5);
-  border: 3px solid #0a0a0a;
+  border: clamp(2px, 0.5vw, 3px) solid #0a0a0a;
   position: relative;
 }
 
@@ -51,8 +52,8 @@
 
 .sampler-header {
   text-align: center;
-  margin-bottom: 1.5rem;
-  padding: 1rem;
+  margin-bottom: clamp(0.75rem, 1.5vw, 1rem);
+  padding: clamp(0.75rem, 1.5vw, 1rem);
   background: linear-gradient(180deg, #0d0d0d 0%, #1a1a1a 100%);
   border-radius: 4px;
   border: 2px solid #0a0a0a;
@@ -99,14 +100,15 @@
 }
 
 .pads-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 0.75rem;
-  margin-bottom: 2rem;
-  padding: 1.5rem;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: clamp(0.4rem, 0.8vw, 0.6rem);
+  margin-bottom: clamp(0.75rem, 1.5vw, 1.25rem);
+  padding: clamp(0.75rem, 1.5vw, 1.25rem);
   background: #0d0d0d;
-  border-radius: 6px;
-  border: 2px solid #000;
+  border-radius: clamp(4px, 1vw, 6px);
+  border: clamp(1px, 0.3vw, 2px) solid #000;
   box-shadow: inset 0 4px 8px rgba(0, 0, 0, 0.8);
   position: relative;
 }
@@ -134,22 +136,26 @@
 
 .pad {
   aspect-ratio: 1;
-  border-radius: 4px;
+  flex: 1 1 calc(25% - clamp(0.4rem, 0.8vw, 0.6rem));
+  max-width: 100px;
+  border-radius: clamp(2px, 0.5vw, 4px);
   cursor: pointer;
   display: flex;
-  gap: 10px;
+  gap: clamp(3px, 0.8vw, 6px);
   flex-direction: column;
   justify-content: center;
   align-items: center;
   position: relative;
   transition: all 0.05s ease;
-  border: 2px solid rgba(0, 0, 0, 0.5);
+  border: clamp(1px, 0.3vw, 2px) solid rgba(0, 0, 0, 0.5);
   box-shadow: 
     0 4px 0 rgba(0, 0, 0, 0.4),
     0 6px 8px rgba(0, 0, 0, 0.3),
     inset 0 1px 0 rgba(255, 255, 255, 0.2);
   background: linear-gradient(145deg, var(--pad-color, #333) 0%, var(--pad-color-dark, #222) 100%);
   font-family: 'Share Tech Mono', monospace;
+  min-height: 60px;
+  touch-action: manipulation;
 }
 
 /* Rubber pad texture */
@@ -227,12 +233,12 @@
 }
 
 .pad-key {
-  font-size: 1.8rem;
+  font-size: clamp(0.9rem, 3vw, 1.2rem);
   font-weight: 700;
   background: rgba(0, 0, 0, 0.4);
-  padding: 0.25rem 0.6rem;
-  border-radius: 3px;
-  min-width: 2.5rem;
+  padding: clamp(0.15rem, 0.4vw, 0.2rem) clamp(0.3rem, 0.8vw, 0.5rem);
+  border-radius: clamp(2px, 0.4vw, 3px);
+  min-width: clamp(1.5rem, 4vw, 2rem);
   text-align: center;
   box-shadow: inset 0 2px 3px rgba(0, 0, 0, 0.6);
   border: 1px solid rgba(0, 0, 0, 0.5);
@@ -240,7 +246,7 @@
 }
 
 .pad-name {
-  font-size: 0.55rem;
+  font-size: clamp(0.4rem, 1vw, 0.5rem);
   opacity: 0.85;
   text-align: center;
   max-width: 90%;
@@ -249,44 +255,46 @@
   white-space: nowrap;
   font-weight: 600;
   background: rgba(0, 0, 0, 0.3);
-  padding: 0.15rem 0.4rem;
-  border-radius: 2px;
-  letter-spacing: 0.5px;
+  padding: clamp(0.08rem, 0.25vw, 0.12rem) clamp(0.25rem, 0.6vw, 0.35rem);
+  border-radius: clamp(1px, 0.3vw, 2px);
+  letter-spacing: 0.2px;
   text-transform: uppercase;
 }
 
 .pad-upload {
-  font-size: 2.5rem;
+  font-size: clamp(1.5rem, 4vw, 2rem);
   color: #4a4a4a;
   font-weight: 300;
 }
 
 .pad-controls {
   display: flex;
-  gap: 4px;
+  gap: 3px;
   z-index: 10;
 }
 
 .key-assign-btn,
 .replace-btn {
-  padding: 0.25rem 0.45rem;
-  font-size: 0.55rem;
+  padding: clamp(0.18rem, 0.4vw, 0.22rem) clamp(0.3rem, 0.8vw, 0.4rem);
+  font-size: clamp(0.42rem, 1vw, 0.5rem);
   background: linear-gradient(145deg, #3a3a3a 0%, #1a1a1a 100%);
-  color: white;
+  color: #3df593;
   cursor: pointer;
   transition: all 0.1s ease;
   font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.2px;
   font-family: 'Share Tech Mono', monospace;
   box-shadow: 
     0 2px 0 rgba(0, 0, 0, 0.5),
     inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  touch-action: manipulation;
+  min-height: 24px;
 }
 
 .replace-btn {
-  padding: 0.25rem 0.5rem;
-  font-size: 0.9rem;
+  padding: clamp(0.18rem, 0.4vw, 0.22rem) clamp(0.35rem, 0.8vw, 0.45rem);
+  font-size: clamp(0.7rem, 1.8vw, 0.85rem);
   line-height: 1;
   min-width: auto;
 }
@@ -447,23 +455,23 @@
 .bpm-control {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.4rem;
   font-family: 'Share Tech Mono', monospace;
   color: #3df593;
-  font-size: 0.7rem;
+  font-size: clamp(0.6rem, 1.2vw, 0.68rem);
   font-weight: 700;
   letter-spacing: 1px;
 }
 
 .bpm-control input {
-  width: 60px;
-  padding: 0.4rem 0.5rem;
+  width: clamp(50px, 10vw, 60px);
+  padding: clamp(0.3rem, 0.6vw, 0.4rem) clamp(0.4rem, 0.8vw, 0.5rem);
   background: #0a0a0a;
   border: 1px solid #2a2a2a;
   border-radius: 3px;
   color: #3df593;
   font-family: 'Share Tech Mono', monospace;
-  font-size: 0.75rem;
+  font-size: clamp(0.65rem, 1.3vw, 0.72rem);
   text-align: center;
   box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.8);
 }
@@ -591,9 +599,9 @@
 
 /* Recorder Styles */
 .recorder-container {
-  margin-bottom: 2rem;
+  margin-bottom: clamp(0.5rem, 1vw, 0.75rem);
   background: linear-gradient(145deg, #1f1f1f 0%, #0d0d0d 100%);
-  padding: 1.5rem;
+  padding: clamp(0.6rem, 1.2vw, 1rem);
   border-radius: 6px;
   border: 2px solid #0a0a0a;
   box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.6);
@@ -601,15 +609,15 @@
 }
 
 .recorder-header {
-  margin-bottom: 1rem;
-  padding-bottom: 0.75rem;
+  margin-bottom: clamp(0.4rem, 0.8vw, 0.6rem);
+  padding-bottom: clamp(0.4rem, 0.8vw, 0.6rem);
   border-bottom: 1px solid #2a2a2a;
 }
 
 .recorder-title {
   font-family: 'Share Tech Mono', monospace;
   color: #3df593;
-  font-size: 0.9rem;
+  font-size: clamp(0.75rem, 1.5vw, 0.85rem);
   font-weight: 400;
   letter-spacing: 2px;
   text-shadow: 0 0 8px rgba(61, 245, 147, 0.5);
@@ -619,13 +627,13 @@
 .recorder-controls {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
-  margin-bottom: 1.25rem;
+  gap: clamp(0.5rem, 1vw, 0.75rem);
+  margin-bottom: clamp(0.5rem, 1vw, 0.75rem);
 }
 
 .recorder-settings {
   display: flex;
-  gap: 1.5rem;
+  gap: clamp(0.75rem, 1.5vw, 1.5rem);
   align-items: center;
   justify-content: center;
   flex-wrap: wrap;
@@ -634,26 +642,26 @@
 .bars-control {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.4rem;
   font-family: 'Share Tech Mono', monospace;
   color: #3df593;
-  font-size: 0.7rem;
+  font-size: clamp(0.6rem, 1.2vw, 0.68rem);
   font-weight: 700;
   letter-spacing: 1px;
 }
 
 .bars-selector {
   display: flex;
-  gap: 0.25rem;
+  gap: 0.2rem;
   background: #0a0a0a;
-  padding: 0.2rem;
+  padding: 0.15rem;
   border-radius: 3px;
   box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.8);
 }
 
 .bar-btn {
-  padding: 0.4rem 0.8rem;
-  font-size: 0.75rem;
+  padding: clamp(0.3rem, 0.6vw, 0.35rem) clamp(0.6rem, 1.2vw, 0.75rem);
+  font-size: clamp(0.62rem, 1.3vw, 0.7rem);
   background: linear-gradient(145deg, #2a2a2a 0%, #1a1a1a 100%);
   color: #7a7a7a;
   border: 1px solid #0a0a0a;
@@ -689,7 +697,7 @@
   align-items: center;
   font-family: 'Share Tech Mono', monospace;
   color: #3df593;
-  font-size: 0.7rem;
+  font-size: clamp(0.6rem, 1.2vw, 0.68rem);
   font-weight: 700;
   letter-spacing: 1px;
 }
@@ -697,14 +705,14 @@
 .metronome-control label {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.4rem;
   cursor: pointer;
 }
 
 .metronome-control input[type="checkbox"] {
   appearance: none;
-  width: 18px;
-  height: 18px;
+  width: clamp(14px, 3vw, 16px);
+  height: clamp(14px, 3vw, 16px);
   background: #0a0a0a;
   border: 2px solid #2a2a2a;
   border-radius: 3px;
@@ -745,26 +753,26 @@
 .countin-control {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.4rem;
   font-family: 'Share Tech Mono', monospace;
   color: #3df593;
-  font-size: 0.7rem;
+  font-size: clamp(0.6rem, 1.2vw, 0.68rem);
   font-weight: 700;
   letter-spacing: 1px;
 }
 
 .countin-selector {
   display: flex;
-  gap: 0.25rem;
+  gap: 0.2rem;
   background: #0a0a0a;
-  padding: 0.2rem;
+  padding: 0.15rem;
   border-radius: 3px;
   box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.8);
 }
 
 .countin-btn {
-  padding: 0.4rem 0.6rem;
-  font-size: 0.7rem;
+  padding: clamp(0.3rem, 0.6vw, 0.35rem) clamp(0.5rem, 1vw, 0.6rem);
+  font-size: clamp(0.62rem, 1.3vw, 0.7rem);
   background: linear-gradient(145deg, #2a2a2a 0%, #1a1a1a 100%);
   color: #7a7a7a;
   border: 1px solid #0a0a0a;
@@ -774,7 +782,7 @@
   font-weight: 700;
   font-family: 'Share Tech Mono', monospace;
   box-shadow: 0 2px 0 rgba(0, 0, 0, 0.5);
-  min-width: 2.5rem;
+  min-width: clamp(2rem, 4vw, 2.5rem);
 }
 
 .countin-btn:hover:not(:disabled) {
@@ -798,7 +806,7 @@
 
 .recorder-transport {
   display: flex;
-  gap: 0.75rem;
+  gap: clamp(0.5rem, 1vw, 0.75rem);
   align-items: center;
   justify-content: center;
   flex-wrap: wrap;
@@ -807,8 +815,8 @@
 .record-btn,
 .play-btn,
 .clear-btn {
-  padding: 0.6rem 1.2rem;
-  font-size: 0.7rem;
+  padding: clamp(0.45rem, 0.9vw, 0.55rem) clamp(0.9rem, 1.8vw, 1.1rem);
+  font-size: clamp(0.62rem, 1.3vw, 0.68rem);
   background: linear-gradient(145deg, #3a3a3a 0%, #1a1a1a 100%);
   color: #3df593;
   border: 1px solid #0a0a0a;
@@ -817,7 +825,7 @@
   transition: all 0.1s ease;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 1px;
+  letter-spacing: 0.8px;
   font-family: 'Share Tech Mono', monospace;
   box-shadow: 
     0 3px 0 rgba(0, 0, 0, 0.5),
@@ -891,7 +899,7 @@
 
 .playback-display {
   background: #0a0a0a;
-  padding: 1rem;
+  padding: clamp(0.6rem, 1.2vw, 0.8rem);
   border-radius: 4px;
   box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.8);
   border: 1px solid #1a1a1a;
@@ -899,10 +907,10 @@
 
 .playback-info {
   display: flex;
-  gap: 1.5rem;
+  gap: clamp(1rem, 2vw, 1.5rem);
   justify-content: center;
   align-items: center;
-  margin-bottom: 1rem;
+  margin-bottom: clamp(0.6rem, 1.2vw, 0.8rem);
   flex-wrap: wrap;
 }
 
@@ -915,21 +923,21 @@
 }
 
 .position-indicator .label {
-  font-size: 0.6rem;
+  font-size: clamp(0.52rem, 1.1vw, 0.58rem);
   color: #555;
-  letter-spacing: 1px;
+  letter-spacing: 0.8px;
   font-weight: 700;
 }
 
 .position-indicator .value {
-  font-size: 1.1rem;
+  font-size: clamp(0.9rem, 1.8vw, 1rem);
   color: #3df593;
   font-weight: 700;
   text-shadow: 0 0 8px rgba(61, 245, 147, 0.5);
-  min-width: 3rem;
+  min-width: clamp(2.5rem, 5vw, 3rem);
   text-align: center;
   background: rgba(61, 245, 147, 0.1);
-  padding: 0.25rem 0.5rem;
+  padding: clamp(0.2rem, 0.4vw, 0.25rem) clamp(0.4rem, 0.8vw, 0.5rem);
   border-radius: 3px;
   border: 1px solid rgba(61, 245, 147, 0.2);
 }
@@ -1105,7 +1113,7 @@
 
 .instructions {
   background: linear-gradient(145deg, #1f1f1f 0%, #0d0d0d 100%);
-  padding: 1.25rem;
+  padding: clamp(0.75rem, 1.5vw, 1rem);
   border-radius: 4px;
   border: 2px solid #0a0a0a;
   box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.6);
@@ -1113,9 +1121,9 @@
 }
 
 .instructions h3 {
-  margin: 0 0 0.75rem 0;
+  margin: 0 0 clamp(0.5rem, 1vw, 0.75rem) 0;
   color: #3df593;
-  font-size: 0.9rem;
+  font-size: clamp(0.75rem, 1.5vw, 0.85rem);
   font-weight: 400;
   letter-spacing: 2px;
   text-transform: uppercase;
@@ -1126,12 +1134,12 @@
   margin: 0;
   padding-left: 1.5rem;
   color: #7a7a7a;
-  font-size: 0.75rem;
-  line-height: 1.8;
+  font-size: clamp(0.65rem, 1.2vw, 0.75rem);
+  line-height: 1.6;
 }
 
 .instructions li {
-  margin-bottom: 0.4rem;
+  margin-bottom: clamp(0.25rem, 0.5vw, 0.35rem);
 }
 
 .instructions li:last-child {
@@ -1170,59 +1178,188 @@
 }
 
 @media (max-width: 768px) {
-  .sampler-container {
-    max-width: 600px;
-    padding: 2.5rem 2rem 2rem;
+  .recorder-settings {
+    flex-wrap: wrap;
+    gap: 1rem;
   }
 
-  .pads-grid {
-    gap: 0.6rem;
+  .recorder-transport {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .recorder-container {
     padding: 1rem;
   }
 
+  .playback-info {
+    gap: 1rem;
+  }
+
+  .position-indicator .value {
+    font-size: 1rem;
+    min-width: 2.5rem;
+  }
+
+  .instructions {
+    padding: 1rem;
+  }
+
+  .instructions h3 {
+    font-size: 0.8rem;
+  }
+
+  .instructions ul {
+    font-size: 0.7rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .app {
+    align-items: flex-start;
+    padding-top: 1rem;
+  }
+
   .sampler-header h1 {
-    font-size: 1.6rem;
-    letter-spacing: 3px;
+    font-size: clamp(1.1rem, 5vw, 1.6rem);
+    letter-spacing: clamp(1px, 0.5vw, 3px);
   }
 
-  .pad-key {
-    font-size: 1.4rem;
+  .sampler-header p {
+    font-size: clamp(0.6rem, 1.5vw, 0.75rem);
   }
 
-  .sequencer-controls {
-    justify-content: space-between;
+  .recorder-settings {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
   }
 
-  .step-numbers {
-    grid-template-columns: 30px repeat(16, 1fr);
+  .bpm-control,
+  .bars-control,
+  .metronome-control,
+  .countin-control {
+    flex-direction: column;
+    align-items: stretch;
+    text-align: center;
   }
 
-  .sequencer-row {
-    grid-template-columns: 30px repeat(16, 1fr);
+  .bpm-control input {
+    width: 100%;
+  }
+
+  .bars-selector,
+  .countin-selector {
+    width: 100%;
+    justify-content: space-around;
+  }
+
+  .bar-btn,
+  .countin-btn {
+    flex: 1;
+  }
+
+  .record-btn,
+  .play-btn,
+  .clear-btn {
+    flex: 1;
+    min-width: 0;
+    font-size: clamp(0.6rem, 2vw, 0.7rem);
+    padding: clamp(0.5rem, 1.5vw, 0.6rem) clamp(0.8rem, 2vw, 1.2rem);
+  }
+
+  .playback-info {
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+
+  .position-indicator {
+    min-width: 28%;
+  }
+
+  .pad-upload {
+    font-size: clamp(1.8rem, 6vw, 2.5rem);
   }
 }
 
 @media (max-width: 480px) {
-  .app {
-    padding: 1rem;
+  .sampler-container::before,
+  .sampler-container::after {
+    width: 8px;
+    height: 8px;
+    top: 10px;
   }
 
-  .sampler-container {
-    padding: 2rem 1.5rem 1.5rem;
+  .sampler-container::before {
+    left: 10px;
   }
 
-  .pads-grid {
-    gap: 0.5rem;
-    padding: 0.75rem;
+  .sampler-container::after {
+    right: 10px;
+  }
+
+  .pads-grid::before,
+  .pads-grid::after {
+    width: 6px;
+    height: 6px;
+  }
+
+  .pad {
+    min-height: 50px;
+  }
+
+  .pad-controls {
+    gap: 2px;
+    width: 100%;
+    justify-content: center;
+  }
+
+  .key-assign-btn,
+  .replace-btn {
+    font-size: 0.45rem;
+    padding: 0.2rem 0.3rem;
+    min-height: 24px;
+  }
+
+  .replace-btn {
+    font-size: 0.8rem;
+    padding: 0.2rem 0.35rem;
+  }
+
+  .recording-status,
+  .countin-status {
+    padding: 0.5rem;
+    font-size: 0.65rem;
+  }
+
+  .instructions::before {
+    width: 6px;
+    height: 6px;
+    top: 1rem;
+    right: 1rem;
+  }
+}
+
+@media (max-width: 360px) {
+  .pad {
+    min-height: 45px;
   }
 
   .pad-key {
-    font-size: 1.2rem;
-    padding: 0.2rem 0.5rem;
+    font-size: 0.9rem;
+    min-width: 1.5rem;
   }
 
-  .sampler-header h1 {
-    font-size: 1.3rem;
-    letter-spacing: 2px;
+  .pad-name {
+    font-size: 0.4rem;
+  }
+
+  .position-indicator .label {
+    font-size: 0.5rem;
+  }
+
+  .position-indicator .value {
+    font-size: 0.85rem;
+    min-width: 2rem;
   }
 }
